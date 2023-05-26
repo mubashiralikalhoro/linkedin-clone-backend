@@ -6,7 +6,7 @@
   "author": "Mubashir Ali Kalhoro <108943166+mubashiralikalhoro@users.noreply.github.com>",
   "license": "MIT",
   "scripts": {
-    "dev": "nodemon server.js"
+    "dev": "nodemon src/server.js"
   },
   "dependencies": {
     "dotenv": "^16.0.3",
