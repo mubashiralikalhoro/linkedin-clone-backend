@@ -1,6 +1,7 @@
-const controller = require("../utils/controller");
+const createController = require("../utils/createController");
 
-module.exports.get = controller((req, res) => {
+// api/users
+module.exports.get = createController((req, res) => {
   res.status(200).send([
     {
       id: 1,
@@ -13,9 +14,21 @@ module.exports.get = controller((req, res) => {
   ]);
 });
 
-module.exports.getById = controller((req, res) => {
+module.exports.create = createController((req, res) => {
+  res.status(201).send({
+    id: 1,
+    name: "John Doe",
+  });
+});
+
+// api/users/:id
+module.exports.getById = createController((req, res) => {
   res.status(200).send({
     id: 1,
     name: "John Doe",
   });
+});
+
+module.exports.deleteById = controller((req, res) => {
+  res.status(204).send();
 });
