@@ -1,0 +1,15 @@
+{
+  "name": "linkedin-api-node",
+  "version": "1.0.0",
+  "main": "server.js",
+  "repository": "https://github.com/mubashiralikalhoro/linkedin-api-node.git",
+  "author": "Mubashir Ali Kalhoro <108943166+mubashiralikalhoro@users.noreply.github.com>",
+  "license": "MIT",
+  "scripts": {
+    "dev": "nodemon server.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2"
+  }
+}
