@@ -1,34 +1,49 @@
+const User = require("../models/User");
 const createController = require("../utils/createController");
+const executeQuery = require("../utils/executeQuery");
 
-// api/users
-module.exports.get = createController((req, res) => {
-  res.status(200).send([
-    {
-      id: 1,
-      name: "John Doe",
-    },
-    {
-      id: 2,
-      name: "Jane Doe",
-    },
-  ]);
-});
+module.exports.getAll = createController(async (req, res) => {
+  const { result, error } = await executeQuery(User.getSelectAllQuery());
+  if (error) {
+    res.status(500).send({
+      data: null,
+      error: error,
+    });
+    return;
+  }
 
-module.exports.create = createController((req, res) => {
-  res.status(201).send({
-    id: 1,
-    name: "John Doe",
+  res.status(200).send({
+    data: result,
+    error: null,
   });
 });
 
 // api/users/:id
-module.exports.getById = createController((req, res) => {
+module.exports.getById = createController(async (req, res) => {
+  const { result, error } = await executeQuery(
+    User.getSelectQuery(req.params.id)
+  );
+  if (error) {
+    res.status(500).send({
+      data: null,
+      error: error,
+    });
+    return;
+  }
+
+  res.status(200).send({
+    data: result,
+    error: null,
+  });
+});
+
+module.exports.deleteById = createController((req, res) => {
+  res.status(204).send();
+});
+
+module.exports.updateById = createController((req, res) => {
   res.status(200).send({
     id: 1,
     name: "John Doe",
   });
-});
-
-module.exports.deleteById = controller((req, res) => {
-  res.status(204).send();
 });
