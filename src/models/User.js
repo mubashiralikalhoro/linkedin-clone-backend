@@ -25,7 +25,6 @@ class User {
 
   // queries
   getInsertQuery() {
-    this.createdAt = new Date().toISOString();
     return `INSERT INTO users(username,fullname,password,email,createdAt)
      VALUES ('${this.username}','${this.fullname}','${this.password}','${this.email}','${this.createdAt}')`;
   }
@@ -55,8 +54,16 @@ class User {
   }
 
   static getUserFromRequestBody = (body) => {
-    const { email, password, fullname, username, phone, dateOfBirth, website } =
-      body;
+    const {
+      email,
+      password,
+      fullname,
+      username,
+      phone,
+      dateOfBirth,
+      website,
+      createdAt,
+    } = body;
     return new User(
       null,
       username,
@@ -66,7 +73,7 @@ class User {
       phone,
       dateOfBirth,
       website,
-      null
+      createdAt
     );
   };
 
@@ -83,6 +90,18 @@ class User {
 
     return userSchema.validate(object);
   };
+
+  static getSelectUserByEmailQuery(email) {
+    return `SELECT id,username,fullname,email,phone,dateOfBirth,website,createdAt FROM users WHERE email='${email}'`;
+  }
+
+  static getSelectUserByEmailQueryForLogin(email) {
+    return `SELECT * FROM users WHERE email='${email}'`;
+  }
+
+  static getSelectUserByEmailAndPasswordQuery(email, password) {
+    return `SELECT id,username,fullname,email,phone,dateOfBirth,website,createdAt FROM users WHERE email='${email}' AND password='${password}'`;
+  }
 }
 
 module.exports = User;

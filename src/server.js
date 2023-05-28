@@ -1,8 +1,7 @@
 // Imports
 const express = require("express");
 const appConfig = require("./config/config");
-const sql = require("mssql");
-const { config } = require("dotenv");
+const verifyJwt = require("./middleware/verifyJwt");
 
 // Constants
 const PORT = appConfig.app.PORT;
@@ -12,8 +11,10 @@ const app = express();
 app.use(express.json());
 
 // Routes
+// :::: auth
 app.use("/api/auth", require("./routes/auth"));
-app.use("/api/users", require("./routes/users"));
+// :::: app
+app.use("/api/users", verifyJwt, require("./routes/users"));
 
 // Server
 app.listen(PORT, () => {
