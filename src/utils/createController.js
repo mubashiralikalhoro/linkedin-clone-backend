@@ -1,3 +1,4 @@
+const e = require("express");
 const express = require("express");
 
 // this function is helping me with intellisense in vscode for express controllers

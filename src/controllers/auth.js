@@ -14,8 +14,6 @@ const logInSchema = Joi.object({
 module.exports.login = createController(async (req, res) => {
   const { error, value } = logInSchema.validate(req.body);
 
-  console.log("value", value);
-
   // bad request
   if (error) {
     res.status(400).send({
@@ -27,6 +25,7 @@ module.exports.login = createController(async (req, res) => {
 
   // check if user exists
   const userResponse = await executeQuery(
+    req.app.locals.db,
     User.getSelectUserByEmailQueryForLogin(value.email)
   );
 
@@ -96,6 +95,7 @@ module.exports.signup = createController(async (req, res) => {
 
   // check if user exists
   const checkResponse = await executeQuery(
+    req.app.locals.db,
     User.getSelectUserByEmailQuery(value.email)
   );
 
@@ -124,7 +124,7 @@ module.exports.signup = createController(async (req, res) => {
     password: hashedPassword,
   });
 
-  const response = await executeQuery(user.getInsertQuery());
+  const response = await executeQuery(req.app.locals.db, user.getInsertQuery());
   if (response.error) {
     res.status(500).send({
       data: null,
@@ -133,7 +133,10 @@ module.exports.signup = createController(async (req, res) => {
     return;
   }
 
-  const userFromDB = await executeQuery(user.getSelectByEmailQuery());
+  const userFromDB = await executeQuery(
+    req.app.locals.db,
+    user.getSelectByEmailQuery()
+  );
 
   if (userFromDB?.result[0]?.password) {
     delete userFromDB.result[0].password;

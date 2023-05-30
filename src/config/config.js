@@ -14,4 +14,7 @@ module.exports = {
       trustServerCertificate: true,
     },
   },
+  s3: {
+    bucketName: process.env.AWS_BUCKET_NAME,
+  },
 };

@@ -45,12 +45,19 @@ class User {
   }
 
   // static methods
+  static PUBLIC_FIELDS =
+    "id,username,fullname,email,phone,dateOfBirth,website,createdAt,image";
+
+  static getUpdateImageQuery(id, url) {
+    return `UPDATE users SET image='${url}' WHERE id=${id}`;
+  }
+
   static getSelectAllQuery() {
-    return `SELECT id,username,fullname,email,phone,dateOfBirth,website,createdAt FROM users`;
+    return `SELECT ${this.PUBLIC_FIELDS} FROM users`;
   }
 
   static getSelectQuery(id) {
-    return `SELECT id,username,fullname,email,phone,dateOfBirth,website,createdAt FROM users WHERE id=${id}`;
+    return `SELECT ${this.PUBLIC_FIELDS} FROM users WHERE id=${id}`;
   }
 
   static getUserFromRequestBody = (body) => {
@@ -92,7 +99,7 @@ class User {
   };
 
   static getSelectUserByEmailQuery(email) {
-    return `SELECT id,username,fullname,email,phone,dateOfBirth,website,createdAt FROM users WHERE email='${email}'`;
+    return `SELECT ${this.PUBLIC_FIELDS} FROM users WHERE email='${email}'`;
   }
 
   static getSelectUserByEmailQueryForLogin(email) {
@@ -100,7 +107,7 @@ class User {
   }
 
   static getSelectUserByEmailAndPasswordQuery(email, password) {
-    return `SELECT id,username,fullname,email,phone,dateOfBirth,website,createdAt FROM users WHERE email='${email}' AND password='${password}'`;
+    return `SELECT ${this.PUBLIC_FIELDS} FROM users WHERE email='${email}' AND password='${password}'`;
   }
 }
 
