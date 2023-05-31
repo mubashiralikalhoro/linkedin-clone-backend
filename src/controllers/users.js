@@ -1,7 +1,7 @@
 const User = require("../models/User");
 const createController = require("../utils/createController");
 const executeQuery = require("../utils/executeQuery");
-const { uploadFile, deleteFile } = require("../utils/s3");
+const { deleteFile } = require("../utils/s3");
 
 // api/users/:id
 module.exports.getById = createController(async (req, res) => {
@@ -117,11 +117,7 @@ module.exports.updateMe = createController(async (req, res) => {
   });
 });
 
-// api/users/me/profile (POST)
-const fs = require("fs");
-const util = require("util");
-const unlinkFile = util.promisify(fs.unlink);
-
+// api/users/me/images/:imageType (POST)
 module.exports.uploadImage = createController(async (req, res) => {
   const imageType = req.params.image;
   console.log("imageType :", imageType);
@@ -135,8 +131,9 @@ module.exports.uploadImage = createController(async (req, res) => {
     return;
   }
 
-  // get user
+  console.log("file", req.file);
 
+  // get user
   const userResponse = await executeQuery(
     req.app.locals.db,
     User.getSelectQuery(req.userId)
@@ -144,6 +141,7 @@ module.exports.uploadImage = createController(async (req, res) => {
 
   // server error
   if (userResponse.error) {
+    await deleteFile(req.file.key);
     res.status(500).send({
       data: null,
       error: userResponse.error,
@@ -153,6 +151,7 @@ module.exports.uploadImage = createController(async (req, res) => {
 
   // user not found
   if (userResponse.result.length === 0) {
+    await deleteFile(req.file.key);
     res.status(404).send({
       data: null,
       error: "User not found",
@@ -170,48 +169,32 @@ module.exports.uploadImage = createController(async (req, res) => {
     await deleteFile(user.coverImage.replace("/images/", ""));
   }
 
-  // upload file to s3
-  uploadFile(req.file)
-    // success
-    .then(async (data) => {
-      // deleting file from buffer
-      await unlinkFile(req.file.path);
-      // update user image
-      const { result, error } = await executeQuery(
-        req.app.locals.db,
-
-        imageType === "profile"
-          ? User.getUpdateImageQuery(req.userId, `/images/${data.Key}`)
-          : User.getUpdateCoverImageQuery(req.userId, `/images/${data.Key}`)
-      );
-      // server error
-      if (error) {
-        await deleteFile(data.Key);
-        res.status(500).send({
-          data: null,
-          error: error,
-        });
-        return;
-      }
-      // success
-      res.send({
-        data: {
-          ...user,
-          [imageType === "profile"
-            ? "image"
-            : "coverImage"]: `/images/${data.Key}`,
-        },
-        error: null,
-      });
-    })
-    // error
-    .catch(() => {
-      console.log("error uploading file :", error);
-      res.status(500).send({
-        data: null,
-        error: "Internal server error",
-      });
+  // update user image
+  const { error } = await executeQuery(
+    req.app.locals.db,
+    imageType === "profile"
+      ? User.getUpdateImageQuery(req.userId, `/images/${req.file.key}`)
+      : User.getUpdateCoverImageQuery(req.userId, `/images/${req.file.key}`)
+  );
+  // server error
+  if (error) {
+    await deleteFile(req.file.key);
+    res.status(500).send({
+      data: null,
+      error: error,
     });
+    return;
+  }
+  // success
+  res.send({
+    data: {
+      ...user,
+      [imageType === "profile"
+        ? "image"
+        : "coverImage"]: `/images/${req.file.key}`,
+    },
+    error: null,
+  });
 });
 
 // api/users/me/profile (DELETE)
