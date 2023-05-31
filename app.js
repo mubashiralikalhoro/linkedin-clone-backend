@@ -25,7 +25,7 @@ app.use("/api/users", verifyJwt, require("./src/routes/users"));
 sql
   .connect(appConfig.db)
   .then((pool) => {
-    console.log("Connected to DB");
+    console.log("Connected to mssql db on AWS RDS successfully");
     // passing db connection to app
     app.locals.db = pool;
     // starting server

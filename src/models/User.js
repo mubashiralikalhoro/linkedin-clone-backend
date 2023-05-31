@@ -23,33 +23,57 @@ class User {
     this.createdAt = createdAt;
   }
 
+  static validateUpdate = (object) => {
+    const userSchema = Joi.object({
+      fullname: Joi.string(),
+      username: Joi.string(),
+      phone: Joi.string().min(10).max(20),
+      dateOfBirth: Joi.date(),
+      website: Joi.string(),
+      about: Joi.string(),
+      address: Joi.string(),
+    });
+
+    return userSchema.validate(object);
+  };
+
+  static validate = (object) => {
+    const userSchema = Joi.object({
+      email: Joi.string().email().required(),
+      password: Joi.string().min(8).required(),
+      fullname: Joi.string().required(),
+      username: Joi.string().required(),
+      phone: Joi.string(),
+      dateOfBirth: Joi.date(),
+      website: Joi.string(),
+    });
+
+    return userSchema.validate(object);
+  };
+
+  static PUBLIC_FIELDS =
+    "id,username,fullname,email,phone,dateOfBirth,website,createdAt,image,coverImage,about,address";
+
   // queries
   getInsertQuery() {
     return `INSERT INTO users(username,fullname,password,email,createdAt)
      VALUES ('${this.username}','${this.fullname}','${this.password}','${this.email}','${this.createdAt}')`;
   }
 
-  getUpdateQuery() {
-    return `UPDATE users SET username='${this.username}',
-    fullname='${this.fullname}',password='${this.password}',
-    email='${this.email}',phone='${this.phone}',dateOfBirth='${this.dateOfBirth}',
-    website='${this.website}',createdAt='${this.createdAt}' WHERE id=${this.id}`;
-  }
-
   getSelectQuery() {
-    return `SELECT id,username,fullname,email,phone,dateOfBirth,website,createdAt FROM users WHERE id=${this.id}`;
+    return `SELECT ${this.PUBLIC_FIELDS} FROM users WHERE id=${this.id}`;
   }
 
   getSelectByEmailQuery() {
-    return `SELECT id,username,fullname,email,phone,dateOfBirth,website,createdAt FROM users WHERE email='${this.email}'`;
+    return `SELECT ${this.PUBLIC_FIELDS} FROM users WHERE email='${this.email}'`;
   }
-
-  // static methods
-  static PUBLIC_FIELDS =
-    "id,username,fullname,email,phone,dateOfBirth,website,createdAt,image";
 
   static getUpdateImageQuery(id, url) {
     return `UPDATE users SET image='${url}' WHERE id=${id}`;
+  }
+
+  static getUpdateCoverImageQuery(id, url) {
+    return `UPDATE users SET coverImage='${url}' WHERE id=${id}`;
   }
 
   static getSelectAllQuery() {
@@ -84,20 +108,6 @@ class User {
     );
   };
 
-  static validate = (object) => {
-    const userSchema = Joi.object({
-      email: Joi.string().email().required(),
-      password: Joi.string().min(8).required(),
-      fullname: Joi.string().required(),
-      username: Joi.string().required(),
-      phone: Joi.string(),
-      dateOfBirth: Joi.date(),
-      website: Joi.string(),
-    });
-
-    return userSchema.validate(object);
-  };
-
   static getSelectUserByEmailQuery(email) {
     return `SELECT ${this.PUBLIC_FIELDS} FROM users WHERE email='${email}'`;
   }
@@ -108,6 +118,22 @@ class User {
 
   static getSelectUserByEmailAndPasswordQuery(email, password) {
     return `SELECT ${this.PUBLIC_FIELDS} FROM users WHERE email='${email}' AND password='${password}'`;
+  }
+
+  static getUpdateQuery(id, body) {
+    const keys = Object.keys(body);
+    const values = Object.values(body);
+    let updateQuery = "";
+    keys.forEach((key, index) => {
+      updateQuery += `${key}='${values[index]}'`;
+      if (index !== keys.length - 1) {
+        updateQuery += ", ";
+      }
+    });
+
+    console.log("query ", `UPDATE users SET ${updateQuery} WHERE id=${id}`);
+
+    return `UPDATE users SET ${updateQuery} WHERE id=${id}`;
   }
 }
 
