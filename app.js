@@ -2,8 +2,8 @@
 const express = require("express");
 const sql = require("mssql");
 const cors = require("cors");
-const appConfig = require("./config/config");
-const verifyJwt = require("./middleware/verifyJwt");
+const appConfig = require("./src/config/config");
+const verifyJwt = require("./src/middleware/verifyJwt");
 
 // Constants
 const PORT = appConfig.app.PORT;
@@ -15,11 +15,11 @@ app.use(express.json());
 
 // Routes
 // :::: images
-app.use("/images", require("./routes/images"));
+app.use("/images", require("./src/routes/images"));
 // :::: auth
-app.use("/api/auth", require("./routes/auth"));
+app.use("/api/auth", require("./src/routes/auth"));
 // :::: app
-app.use("/api/users", verifyJwt, require("./routes/users"));
+app.use("/api/users", verifyJwt, require("./src/routes/users"));
 
 // Server with DB connection
 sql

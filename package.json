@@ -1,12 +1,13 @@
 {
   "name": "linkedin-api-node",
   "version": "1.0.0",
-  "main": "server.js",
+  "main": "app.js",
   "repository": "https://github.com/mubashiralikalhoro/linkedin-api-node.git",
   "author": "Mubashir Ali Kalhoro <108943166+mubashiralikalhoro@users.noreply.github.com>",
   "license": "MIT",
   "scripts": {
-    "dev": "nodemon src/server.js"
+    "start": "node app.js",
+    "dev": "nodemon app.js"
   },
   "dependencies": {
     "aws-sdk": "^2.1386.0",
