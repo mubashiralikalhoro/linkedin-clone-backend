@@ -9,7 +9,7 @@ module.exports = async (db, query) => {
     result = result?.recordset;
   } catch (connectionError) {
     error = connectionError.message;
-    console.log("error from api", error);
+    console.log("DB ERROR :", error, "\nQUERY :", query);
   }
   return { result, error };
 };

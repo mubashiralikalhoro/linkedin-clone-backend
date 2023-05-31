@@ -20,6 +20,7 @@ app.use("/images", require("./src/routes/images"));
 app.use("/api/auth", require("./src/routes/auth"));
 // :::: app
 app.use("/api/users", verifyJwt, require("./src/routes/users"));
+app.use("/api/posts", verifyJwt, require("./src/routes/posts"));
 
 // Server with DB connection
 sql

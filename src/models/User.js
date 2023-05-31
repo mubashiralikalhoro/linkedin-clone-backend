@@ -25,13 +25,13 @@ class User {
 
   static validateUpdate = (object) => {
     const userSchema = Joi.object({
-      fullname: Joi.string(),
-      username: Joi.string(),
+      fullname: Joi.string().max(255),
+      username: Joi.string().max(255),
       phone: Joi.string().min(10).max(20),
       dateOfBirth: Joi.date(),
       website: Joi.string(),
-      about: Joi.string(),
-      address: Joi.string(),
+      about: Joi.string().max(1000),
+      address: Joi.string().max(255),
     });
 
     return userSchema.validate(object);
