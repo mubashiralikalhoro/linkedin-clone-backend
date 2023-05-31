@@ -7,7 +7,7 @@ router.route("/me").get(usersController.getMe).put(usersController.updateMe);
 
 // api/users/me/profile
 const multer = require("multer");
-const upload = multer({ dest: "uploads/" });
+const upload = multer({ dest: "tmp/" });
 router
   .route("/me/images/:image")
   .post(upload.single("file"), usersController.uploadImage)
