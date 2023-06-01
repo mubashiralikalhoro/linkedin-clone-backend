@@ -10,13 +10,15 @@ const getPostObjectFormat = (item) => ({
   id: item?.id,
   title: item?.title,
   description: item?.description,
-  image: item?.uuid,
+  image: item?.image,
   createdAt: item?.createdAt,
   uuid: item?.uuid,
   user: {
     id: item?.userId,
+    username: item?.userUsername,
     fullname: item?.userFullname,
     image: item?.userImage,
+    work: item?.userWork,
   },
 });
 

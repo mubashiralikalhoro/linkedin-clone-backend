@@ -1,7 +1,7 @@
 const Joi = require("joi");
 
 const SELECTED_FIELDS =
-  "posts.*,users.fullname userFullname,users.image userImage";
+  "posts.*,users.fullname userFullname,users.image userImage,users.work userWork,users.username userUsername";
 const JOIN = "INNER JOIN users ON users.id=posts.userId";
 // id,title,description,image,createdAt,userId
 class Post {
@@ -25,7 +25,7 @@ class Post {
       Object.keys(filter).forEach((key, index) => {
         filterQuery += `and posts.${key}='${filter[key]}'`;
       });
-      return `SELECT ${SELECTED_FIELDS} FROM posts ${JOIN} ${filterQuery}`;
+      return `SELECT ${SELECTED_FIELDS} FROM posts ${JOIN} ${filterQuery} ORDER BY posts.id DESC`;
     },
   };
 }

@@ -1,7 +1,7 @@
 const Joi = require("joi");
 
 const SELECTED_FIELDS =
-  "id,username,fullname,email,phone,dateOfBirth,website,createdAt,image,coverImage,about,address";
+  "id,username,fullname,email,phone,dateOfBirth,website,createdAt,image,coverImage,about,address,work";
 class User {
   static validateUpdate = (object) => {
     const userSchema = Joi.object({
@@ -12,6 +12,7 @@ class User {
       website: Joi.string(),
       about: Joi.string().max(1000),
       address: Joi.string().max(255),
+      work: Joi.string().max(255),
     });
 
     return userSchema.validate(object);
