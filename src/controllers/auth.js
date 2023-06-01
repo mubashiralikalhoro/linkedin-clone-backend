@@ -1,6 +1,6 @@
 const createController = require("../utils/createController");
 const User = require("../models/User");
-const executeQuery = require("../utils/executeQuery");
+const { executeQuery, executeQueryWithData } = require("../utils/executeQuery");
 const Joi = require("joi");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
@@ -26,7 +26,9 @@ module.exports.login = createController(async (req, res) => {
   // check if user exists
   const userResponse = await executeQuery(
     req.app.locals.db,
-    User.getSelectUserByEmailQueryForLogin(value.email)
+    User.QUERIES.getWithPassword({
+      email: value.email,
+    })
   );
 
   // internal server error
@@ -71,6 +73,9 @@ module.exports.login = createController(async (req, res) => {
   );
 
   // remove password from response
+  if (userResponse.result[0]?.password) {
+    delete userResponse.result[0].password;
+  }
 
   // success
   res.status(200).send({
@@ -96,7 +101,7 @@ module.exports.signup = createController(async (req, res) => {
   // check if user exists
   const checkResponse = await executeQuery(
     req.app.locals.db,
-    User.getSelectUserByEmailQuery(value.email)
+    User.QUERIES.get({ email: value.email })
   );
 
   if (checkResponse.error) {
@@ -118,13 +123,18 @@ module.exports.signup = createController(async (req, res) => {
 
   const hashedPassword = await bcrypt.hash(value.password, 10);
 
-  const user = User.getUserFromRequestBody({
+  let payload = {
     ...value,
     createdAt: new Date().toISOString(),
     password: hashedPassword,
-  });
+  };
 
-  const response = await executeQuery(req.app.locals.db, user.getInsertQuery());
+  const response = await executeQueryWithData(
+    req.app.locals.db,
+    User.QUERIES.insert(),
+    payload
+  );
+
   if (response.error) {
     res.status(500).send({
       data: null,
@@ -135,12 +145,10 @@ module.exports.signup = createController(async (req, res) => {
 
   const userFromDB = await executeQuery(
     req.app.locals.db,
-    user.getSelectByEmailQuery()
+    User.QUERIES.get({
+      email: value.email,
+    })
   );
-
-  if (userFromDB?.result[0]?.password) {
-    delete userFromDB.result[0].password;
-  }
 
   const jwtToken = jwt.sign(
     {
@@ -149,6 +157,7 @@ module.exports.signup = createController(async (req, res) => {
     },
     config.app.JWT_SECRET
   );
+
   res.status(201).send({
     data: {
       jwt: jwtToken,

@@ -1,8 +1,7 @@
 const { v4 } = require("uuid");
 const Post = require("../models/Post");
-
 const createController = require("../utils/createController");
-const executeQuery = require("../utils/executeQuery");
+const { executeQuery, executeQueryWithData } = require("../utils/executeQuery");
 const { deleteFile } = require("../utils/s3");
 
 // helper
@@ -26,7 +25,7 @@ module.exports.get = createController(async (req, res) => {
   console.log("queries", req.query);
   const { error, result } = await executeQuery(
     req.app.locals.db,
-    Post.getSelectAllQuery()
+    Post.QUERIES.get()
   );
 
   if (error) {
@@ -59,18 +58,21 @@ module.exports.post = createController(async (req, res) => {
   }
 
   const image = req?.file ? `/images/${req.file.key}` : "";
-  const post = new Post(
-    v4(),
-    value?.title,
-    value?.description,
-    image,
-    new Date().toISOString(),
-    req.userId
-  );
 
-  const saveResponse = await executeQuery(
+  // (@uuid,@title,@description,@image,@createdAt,@userId)
+  let payload = {
+    uuid: v4(),
+    title: value.title,
+    description: value.description,
+    image: image,
+    createdAt: new Date().toISOString(),
+    userId: req.userId,
+  };
+
+  const saveResponse = await executeQueryWithData(
     req.app.locals.db,
-    post.getInsertQuery()
+    Post.QUERIES.insert(),
+    payload
   );
 
   // server error
@@ -84,7 +86,9 @@ module.exports.post = createController(async (req, res) => {
 
   const dbResponse = await executeQuery(
     req.app.locals.db,
-    post.getSelectByUuidQuery()
+    Post.QUERIES.get({
+      uuid: payload.uuid,
+    })
   );
 
   // server error
@@ -106,7 +110,9 @@ module.exports.getById = createController(async (req, res) => {
   const id = req.params.id;
   const { error, result } = await executeQuery(
     req.app.locals.db,
-    Post.getSelectQuery(id)
+    Post.QUERIES.get({
+      id: id,
+    })
   );
 
   if (error) {
@@ -125,9 +131,10 @@ module.exports.getById = createController(async (req, res) => {
 
 module.exports.deleteById = createController(async (req, res) => {
   const id = req.params.id;
-  const { error, result } = await executeQuery(
+
+  const { error } = await executeQuery(
     req.app.locals.db,
-    Post.getDeleteByIdQuery(id)
+    Post.QUERIES.delete(id)
   );
 
   if (error) {

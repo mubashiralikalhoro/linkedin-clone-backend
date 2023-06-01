@@ -1,28 +1,8 @@
 const Joi = require("joi");
 
+const SELECTED_FIELDS =
+  "id,username,fullname,email,phone,dateOfBirth,website,createdAt,image,coverImage,about,address";
 class User {
-  constructor(
-    id,
-    username,
-    fullname,
-    password,
-    email,
-    phone,
-    dateOfBirth,
-    website,
-    createdAt
-  ) {
-    this.id = id;
-    this.username = username;
-    this.fullname = fullname;
-    this.password = password;
-    this.email = email;
-    this.phone = phone;
-    this.dateOfBirth = dateOfBirth;
-    this.website = website;
-    this.createdAt = createdAt;
-  }
-
   static validateUpdate = (object) => {
     const userSchema = Joi.object({
       fullname: Joi.string().max(255),
@@ -51,90 +31,42 @@ class User {
     return userSchema.validate(object);
   };
 
-  static PUBLIC_FIELDS =
-    "id,username,fullname,email,phone,dateOfBirth,website,createdAt,image,coverImage,about,address";
+  static QUERIES = {
+    insert: () =>
+      `INSERT INTO users(username,fullname,password,email,createdAt) VALUES (@username,@fullname,@password,@email,@createdAt)`,
+    delete: (id) => `DELETE users WHERE id=${id}`,
+    update: {
+      image: (id, url) => `UPDATE users SET image='${url}' WHERE id=${id}`,
+      coverImage: (id, url) =>
+        `UPDATE users SET coverImage='${url}' WHERE id=${id}`,
 
-  // queries
-  getInsertQuery() {
-    return `INSERT INTO users(username,fullname,password,email,createdAt)
-     VALUES ('${this.username}','${this.fullname}','${this.password}','${this.email}','${this.createdAt}')`;
-  }
+      columns: (id, columnNames = []) => {
+        let updateQuery = "";
+        columnNames.forEach((column, index) => {
+          updateQuery += `${column}=@${column}`;
+          if (index !== columnNames.length - 1) {
+            updateQuery += ", ";
+          }
+        });
+        return `UPDATE users SET ${updateQuery} WHERE id=${id}`;
+      },
+    },
+    get: (filter = {}) => {
+      let filterQuery = "";
+      Object.keys(filter).forEach((key, index) => {
+        filterQuery += `AND ${key}='${filter[key]}'`;
+      });
+      return `SELECT ${SELECTED_FIELDS} FROM users WHERE id IS NOT NULL ${filterQuery}`;
+    },
 
-  getSelectQuery() {
-    return `SELECT ${this.PUBLIC_FIELDS} FROM users WHERE id=${this.id}`;
-  }
-
-  getSelectByEmailQuery() {
-    return `SELECT ${this.PUBLIC_FIELDS} FROM users WHERE email='${this.email}'`;
-  }
-
-  static getUpdateImageQuery(id, url) {
-    return `UPDATE users SET image='${url}' WHERE id=${id}`;
-  }
-
-  static getUpdateCoverImageQuery(id, url) {
-    return `UPDATE users SET coverImage='${url}' WHERE id=${id}`;
-  }
-
-  static getSelectAllQuery() {
-    return `SELECT ${this.PUBLIC_FIELDS} FROM users`;
-  }
-
-  static getSelectQuery(id) {
-    return `SELECT ${this.PUBLIC_FIELDS} FROM users WHERE id=${id}`;
-  }
-
-  static getUserFromRequestBody = (body) => {
-    const {
-      email,
-      password,
-      fullname,
-      username,
-      phone,
-      dateOfBirth,
-      website,
-      createdAt,
-    } = body;
-    return new User(
-      null,
-      username,
-      fullname,
-      password,
-      email,
-      phone,
-      dateOfBirth,
-      website,
-      createdAt
-    );
+    getWithPassword: (filter = {}) => {
+      let filterQuery = "";
+      Object.keys(filter).forEach((key, index) => {
+        filterQuery += `AND ${key}='${filter[key]}'`;
+      });
+      return `SELECT * FROM users WHERE id IS NOT NULL ${filterQuery}`;
+    },
   };
-
-  static getSelectUserByEmailQuery(email) {
-    return `SELECT ${this.PUBLIC_FIELDS} FROM users WHERE email='${email}'`;
-  }
-
-  static getSelectUserByEmailQueryForLogin(email) {
-    return `SELECT * FROM users WHERE email='${email}'`;
-  }
-
-  static getSelectUserByEmailAndPasswordQuery(email, password) {
-    return `SELECT ${this.PUBLIC_FIELDS} FROM users WHERE email='${email}' AND password='${password}'`;
-  }
-
-  static getUpdateQuery(id, body) {
-    const keys = Object.keys(body);
-    const values = Object.values(body);
-    let updateQuery = "";
-    keys.forEach((key, index) => {
-      updateQuery += `${key}='${values[index]}'`;
-      if (index !== keys.length - 1) {
-        updateQuery += ", ";
-      }
-    });
-
-    console.log("query ", `UPDATE users SET ${updateQuery} WHERE id=${id}`);
-
-    return `UPDATE users SET ${updateQuery} WHERE id=${id}`;
-  }
 }
 
 module.exports = User;

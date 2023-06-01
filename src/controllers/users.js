@@ -1,14 +1,18 @@
 const User = require("../models/User");
 const createController = require("../utils/createController");
-const executeQuery = require("../utils/executeQuery");
+const { executeQuery, executeQueryWithData } = require("../utils/executeQuery");
 const { deleteFile } = require("../utils/s3");
 
 // api/users/:id
 module.exports.getById = createController(async (req, res) => {
+  const id = req.params.id;
   const { result, error } = await executeQuery(
     req.app.locals.db,
-    User.getSelectQuery(req.params.id)
+    User.QUERIES.get({
+      id: id,
+    })
   );
+
   if (error) {
     res.status(500).send({
       data: null,
@@ -17,8 +21,17 @@ module.exports.getById = createController(async (req, res) => {
     return;
   }
 
+  // user not found
+  if (result.length === 0) {
+    res.status(404).send({
+      data: null,
+      error: "User not found",
+    });
+    return;
+  }
+
   res.status(200).send({
-    data: result,
+    data: result?.[0],
     error: null,
   });
 });
@@ -29,7 +42,9 @@ module.exports.getMe = createController(async (req, res) => {
 
   const { result, error } = await executeQuery(
     req.app.locals.db,
-    User.getSelectQuery(req.userId)
+    User.QUERIES.get({
+      id: req.userId,
+    })
   );
 
   // server error
@@ -78,12 +93,11 @@ module.exports.updateMe = createController(async (req, res) => {
     return;
   }
 
-  console.log("value :", value);
-
   // update user
-  const dbResponse = await executeQuery(
+  const dbResponse = await executeQueryWithData(
     req.app.locals.db,
-    User.getUpdateQuery(req.userId, value)
+    User.QUERIES.update.columns(req.userId, Object.keys(value)),
+    value
   );
 
   // server error
@@ -98,7 +112,9 @@ module.exports.updateMe = createController(async (req, res) => {
   // getting updated user
   const updatedUser = await executeQuery(
     req.app.locals.db,
-    User.getSelectQuery(req.userId)
+    User.QUERIES.get({
+      id: req.userId,
+    })
   );
 
   // server error
@@ -136,7 +152,9 @@ module.exports.uploadImage = createController(async (req, res) => {
   // get user
   const userResponse = await executeQuery(
     req.app.locals.db,
-    User.getSelectQuery(req.userId)
+    User.QUERIES.get({
+      id: req.userId,
+    })
   );
 
   // server error
@@ -173,8 +191,8 @@ module.exports.uploadImage = createController(async (req, res) => {
   const { error } = await executeQuery(
     req.app.locals.db,
     imageType === "profile"
-      ? User.getUpdateImageQuery(req.userId, `/images/${req.file.key}`)
-      : User.getUpdateCoverImageQuery(req.userId, `/images/${req.file.key}`)
+      ? User.QUERIES.update.image(req.userId, `/images/${req.file.key}`)
+      : User.QUERIES.update.coverImage(req.userId, `/images/${req.file.key}`)
   );
   // server error
   if (error) {
@@ -204,7 +222,9 @@ module.exports.deleteImage = createController(async (req, res) => {
 
   const UserResponse = await executeQuery(
     req.app.locals.db,
-    User.getSelectQuery(req.userId)
+    User.QUERIES.get({
+      id: req.userId,
+    })
   );
 
   // server error
@@ -231,7 +251,7 @@ module.exports.deleteImage = createController(async (req, res) => {
       : UserResponse.result[0].coverImage;
 
   // user does not have a profile picture
-  if (image === null) {
+  if (!image) {
     res.status(400).send({
       data: null,
       error: "User does not have a profile picture",
@@ -247,8 +267,8 @@ module.exports.deleteImage = createController(async (req, res) => {
       const { result, error } = await executeQuery(
         req.app.locals.db,
         imageType === "profile"
-          ? User.getUpdateImageQuery(req.userId, ``)
-          : User.getUpdateCoverImageQuery(req.userId, ``)
+          ? User.QUERIES.update.image(req.userId, ``)
+          : User.QUERIES.update.coverImage(req.userId, ``)
       );
 
       // server error
