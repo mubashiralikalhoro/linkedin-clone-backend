@@ -26,7 +26,7 @@ app.use("/api/posts", verifyJwt, require("./src/routes/posts"));
 sql
   .connect(appConfig.db)
   .then((pool) => {
-    console.log("Connected to mssql db on AWS RDS successfully");
+    console.log("Connected to  SQL SERVER on GOOGLE CLOUD successfully");
     // passing db connection to app
     app.locals.db = pool;
     // starting server
