@@ -52,10 +52,14 @@ class User {
         return `UPDATE users SET ${updateQuery} WHERE id=${id}`;
       },
     },
-    get: (filter = {}) => {
+    get: (filter = {}, filterType = "=") => {
       let filterQuery = "";
       Object.keys(filter).forEach((key, index) => {
-        filterQuery += `AND ${key}='${filter[key]}'`;
+        if (filterType === "=") {
+          filterQuery += `AND ${key}='${filter[key]}'`;
+        } else {
+          filterQuery += `AND ${key} LIKE '%${filter[key]}%'`;
+        }
       });
       return `SELECT ${SELECTED_FIELDS} FROM users WHERE id IS NOT NULL ${filterQuery}`;
     },

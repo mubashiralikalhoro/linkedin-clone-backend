@@ -1,15 +1,63 @@
+const { object } = require("joi");
 const User = require("../models/User");
 const createController = require("../utils/createController");
 const { executeQuery, executeQueryWithData } = require("../utils/executeQuery");
 const { deleteFile } = require("../utils/s3");
+const Joi = require("joi");
 
-// api/users/:id
-module.exports.getById = createController(async (req, res) => {
-  const id = req.params.id;
+// api/users
+module.exports.get = createController(async (req, res) => {
+  const queries = req.query;
+
+  // without queries (can't get all users)
+  if (Object.keys(queries).length === 0) {
+    res.status(401).send({
+      data: null,
+      error: "Can't get all users",
+    });
+  }
+
+  const { error } = Joi.object({
+    username: Joi.string(),
+    address: Joi.string(),
+    fullname: Joi.string(),
+    email: Joi.string(),
+    id: Joi.string(),
+  }).validate(queries);
+
+  if (error) {
+    res.status(400).send({
+      data: null,
+      error: error.message,
+    });
+  }
+
+  const queryResponse = await executeQuery(
+    req.app.locals.db,
+    User.QUERIES.get(queries, "like")
+  );
+
+  if (queryResponse.error) {
+    res.status(500).send({
+      data: null,
+      error: error,
+    });
+    return;
+  }
+
+  res.status(200).send({
+    data: queryResponse.result,
+    error: null,
+  });
+});
+
+// api/users/:username
+module.exports.getByUsername = createController(async (req, res) => {
+  const username = req.params.username;
   const { result, error } = await executeQuery(
     req.app.locals.db,
     User.QUERIES.get({
-      id: id,
+      username: username,
     })
   );
 
@@ -137,7 +185,7 @@ module.exports.updateMe = createController(async (req, res) => {
 module.exports.uploadImage = createController(async (req, res) => {
   const imageType = req.params.image;
   console.log("imageType :", imageType);
-
+  console.log("file :", req.file);
   // no file uploaded
   if (!req.file) {
     res.status(400).send({
@@ -147,7 +195,7 @@ module.exports.uploadImage = createController(async (req, res) => {
     return;
   }
 
-  console.log("file", req.file);
+  console.log("file :", req.file);
 
   // get user
   const userResponse = await executeQuery(
