@@ -14,7 +14,7 @@ const logInSchema = Joi.object({
 module.exports.login = createController(async (req, res) => {
   const { error, value } = logInSchema.validate(req.body);
 
-  // bad request
+  // bad request (validation error)
   if (error) {
     res.status(400).send({
       data: null,
@@ -23,7 +23,7 @@ module.exports.login = createController(async (req, res) => {
     return;
   }
 
-  // check if user exists
+  // check if user exists )
   const userResponse = await executeQuery(
     req.app.locals.db,
     User.QUERIES.getWithPassword({
@@ -31,7 +31,7 @@ module.exports.login = createController(async (req, res) => {
     })
   );
 
-  // internal server error
+  // internal server error (db error)
   if (userResponse.error) {
     res.status(500).send({
       data: null,
@@ -40,7 +40,7 @@ module.exports.login = createController(async (req, res) => {
     return;
   }
 
-  // user not found
+  // user not found (no user with this email)
   if (userResponse?.result?.length === 0) {
     res.status(404).send({
       data: null,

@@ -227,7 +227,6 @@ module.exports.uploadImage = createController(async (req, res) => {
 
   // user found
   const user = userResponse.result[0];
-
   // delete previous image
   if (imageType === "profile" && user.profileImage) {
     await deleteFile(user.profileImage.replace("/images/", ""));
@@ -302,7 +301,7 @@ module.exports.deleteImage = createController(async (req, res) => {
   if (!image) {
     res.status(400).send({
       data: null,
-      error: "User does not have a profile picture",
+      error: `User does not have a ${imageType}.`,
     });
     return;
   }
