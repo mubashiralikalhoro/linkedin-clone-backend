@@ -10,7 +10,7 @@ module.exports.executeQuery = async (db, query) => {
     console.log("QUERY EXECUTED :", query);
   } catch (connectionError) {
     error = connectionError.message;
-    console.log("DB ERROR :", error, "\nQUERY :", query);
+    console.log("DB ERROR :", error, "\nON QUERY :", query);
   }
   return { result, error };
 };
@@ -30,7 +30,7 @@ module.exports.executeQueryWithData = async (db, query, data = {}) => {
     console.log("QUERY EXECUTED :", query);
   } catch (connectionError) {
     error = connectionError.message;
-    console.log("DB ERROR :", error, "\nQUERY :", query);
+    console.log("DB ERROR :", error, "\nON QUERY :", query);
   }
   return { result, error };
 };
