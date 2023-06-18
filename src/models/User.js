@@ -13,6 +13,7 @@ class User {
       about: Joi.string().max(1000),
       address: Joi.string().max(255),
       work: Joi.string().max(255),
+      skills: Joi.array().items(Joi.number()),
     });
 
     return userSchema.validate(object);
@@ -38,8 +39,7 @@ class User {
     delete: (id) => `DELETE users WHERE id=${id}`,
     update: {
       image: (id, url) => `UPDATE users SET image='${url}' WHERE id=${id}`,
-      coverImage: (id, url) =>
-        `UPDATE users SET coverImage='${url}' WHERE id=${id}`,
+      coverImage: (id, url) => `UPDATE users SET coverImage='${url}' WHERE id=${id}`,
 
       columns: (id, columnNames = []) => {
         let updateQuery = "";

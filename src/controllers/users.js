@@ -32,10 +32,7 @@ module.exports.get = createController(async (req, res) => {
     });
   }
 
-  const queryResponse = await executeQuery(
-    req.app.locals.db,
-    User.QUERIES.get(queries, "like")
-  );
+  const queryResponse = await executeQuery(req.app.locals.db, User.QUERIES.get(queries, "like"));
 
   if (queryResponse.error) {
     res.status(500).send({
@@ -141,20 +138,61 @@ module.exports.updateMe = createController(async (req, res) => {
     return;
   }
 
-  // update user
-  const dbResponse = await executeQueryWithData(
-    req.app.locals.db,
-    User.QUERIES.update.columns(req.userId, Object.keys(value)),
-    value
-  );
+  // updating skills
+  if (value?.skills) {
+    // removing old skills
 
-  // server error
-  if (dbResponse.error) {
-    res.status(500).send({
-      data: null,
-      error: dbResponse.error,
-    });
-    return;
+    const dbRemoveResponse = await executeQuery(
+      req.app.locals.db,
+      `EXEC proc_remove_user_skills @userId = ${req.userId}`
+    );
+
+    // server error
+    if (dbRemoveResponse.error) {
+      res.status(500).send({
+        data: null,
+        error: dbRemoveResponse.error,
+      });
+      return;
+    }
+
+    // adding new skills
+    for (let i = 0; i < value.skills.length; i++) {
+      const dbResponse = await executeQuery(
+        req.app.locals.db,
+        `EXEC proc_add_skill @userId = ${req.userId}, @skillId = ${value.skills[i]}`
+      );
+
+      // server error
+      if (dbResponse.error) {
+        res.status(500).send({
+          data: null,
+          error: dbResponse.error,
+        });
+        return;
+      }
+    }
+
+    delete value.skills;
+  }
+
+  // if more changes to update
+  if (Object.values(value).length !== 0) {
+    // update user
+    const dbResponse = await executeQueryWithData(
+      req.app.locals.db,
+      User.QUERIES.update.columns(req.userId, Object.keys(value)),
+      value
+    );
+
+    // server error
+    if (dbResponse.error) {
+      res.status(500).send({
+        data: null,
+        error: dbResponse.error,
+      });
+      return;
+    }
   }
 
   // getting updated user
@@ -254,9 +292,7 @@ module.exports.uploadImage = createController(async (req, res) => {
   res.send({
     data: {
       ...user,
-      [imageType === "profile"
-        ? "image"
-        : "coverImage"]: `/images/${req.file.key}`,
+      [imageType === "profile" ? "image" : "coverImage"]: `/images/${req.file.key}`,
     },
     error: null,
   });
@@ -292,10 +328,7 @@ module.exports.deleteImage = createController(async (req, res) => {
     return;
   }
 
-  const image =
-    imageType === "profile"
-      ? UserResponse.result[0].image
-      : UserResponse.result[0].coverImage;
+  const image = imageType === "profile" ? UserResponse.result[0].image : UserResponse.result[0].coverImage;
 
   // user does not have a profile picture
   if (!image) {
