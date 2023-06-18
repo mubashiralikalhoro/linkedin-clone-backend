@@ -7,5 +7,6 @@ router.route("/accept-request").post(connectionController.acceptRequest);
 router.route("/remove-connection").post(connectionController.removeConnection);
 router.route("/get-connections").get(connectionController.getConnectedUsers);
 router.route("/get-requests").get(connectionController.getConnectionRequests);
+router.route("/status").get(connectionController.getConnectionStatus);
 
 module.exports = router;

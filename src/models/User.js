@@ -1,7 +1,8 @@
 const Joi = require("joi");
 
-const SELECTED_FIELDS =
-  "id,username,fullname,email,phone,dateOfBirth,website,createdAt,image,coverImage,about,address,work";
+const SELECTED_FIELDS = `id,username,fullname,email,phone,dateOfBirth,website,createdAt,image,coverImage,about,address,work,
+  (SELECT COUNT(c.id) as 'count' FROM user_connections c WHERE c.fromUserId=users.id OR c.toUserId=users.id) AS connections`;
+
 class User {
   static validateUpdate = (object) => {
     const userSchema = Joi.object({

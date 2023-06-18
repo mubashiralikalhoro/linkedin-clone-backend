@@ -8,17 +8,15 @@ Linked db tables:
 - connection_status [Created] && [Data inserted] // [DB: Created , API:Created , UI: ]
 
   // skills
-- skills : id -> [int] ,name -> [text] // [DB: Created , API: , UI: ]
-- user_skills : id -> [int],userId -> [userId], skillId -> [skillId] // [DB: Created , API: , UI: ]
+- skills : id -> [int] ,name -> [text] // [DB: Created , API:Created , UI: ]
+- user_skills : id -> [int],userId -> [userId], skillId -> [skillId] // [DB: Created , API:Created , UI: ]
 
   // education
-
 - user_educations :id -> [int], userId -> [userId], school -> [text], degree -> [text], majorId -> [majorId],
   start -> [timestamp], end -> [timestamp] => [Created] // [DB: Created , API: , UI: ]
 - majors : id -> [int], name -> [text] => [Created] // [DB: Created , API: , UI: ]
 
   // experience
-
 - user_experiences : id -> [int], userId -> [userId], title -> [text], company -> [text] or companyId -> [companyId],
   startedAt -> [timestamp], endedAt -> [timestamp], description -> [text] // [DB: Created , API: , UI: ]
 
@@ -29,13 +27,11 @@ Linked db tables:
 - post_comments [Created] // [DB: Created , API:Created , UI:Created ]
 
   // companies
-
 - companies :id -> [int], name -> [text], createdAt -> [timestamp],
   description -> [text], website -> [text], logo -> [text], location -> [text] // [DB: Created , API: , UI: ]
 - company_managers : id -> [int], userId -> [userId], companyId -> [companyId] => [Created] // [DB: Created , API: , UI: ]
 
   // job posts
-
 - job_posts : id -> [int], companyId -> [companyId], createdAt -> [timestamp], title -> [text], description -> [text],
   salary -> [text], remote -> [boolean], requirements -> [text], responsibilities -> [text],
   benefits -> [text], image -> [text] // [DB: Created , API: , UI: ]

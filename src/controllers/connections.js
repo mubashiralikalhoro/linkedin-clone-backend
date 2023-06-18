@@ -111,7 +111,10 @@ module.exports.getConnectedUsers = createController(async (req, res) => {
     return;
   }
 
-  const { error, result } = await executeQuery(req.app.locals.db, `EXEC proc_get_user_connections ${userId}`);
+  const { error, result } = await executeQuery(
+    req.app.locals.db,
+    `EXEC proc_get_user_connections ${userId}`
+  );
 
   if (error) {
     res.status(500).send({
@@ -149,7 +152,10 @@ module.exports.getConnectedUsers = createController(async (req, res) => {
 module.exports.getConnectionRequests = createController(async (req, res) => {
   const userId = req.userId;
 
-  const { error, result } = await executeQuery(req.app.locals.db, `EXEC proc_get_user_connection_requests ${userId}`);
+  const { error, result } = await executeQuery(
+    req.app.locals.db,
+    `EXEC proc_get_user_connection_requests ${userId}`
+  );
 
   if (error) {
     res.status(500).send({
@@ -175,4 +181,75 @@ module.exports.getConnectionRequests = createController(async (req, res) => {
     data: finalResult,
     error: null,
   });
+});
+
+module.exports.getConnectionStatus = createController(async (req, res) => {
+  const userId = req.query.userId;
+
+  if (!userId) {
+    res.status(400).send({
+      message: "userId is required",
+    });
+    return;
+  }
+
+  if (Number(userId) === req.userId) {
+    res.status(200).send({
+      data: {
+        status: "self",
+      },
+      error: null,
+    });
+    return;
+  }
+
+  const { error, result } = await executeQuery(
+    req.app.locals.db,
+    `SELECT uc.*,cs.unique_key  FROM user_connections uc INNER JOIN connection_status cs
+     ON cs.id = uc.connectionStatusId AND (uc.fromUserId = ${req.userId} OR uc.toUserId = ${req.userId})`
+  );
+
+  if (error) {
+    res.status(500).send({
+      message: error.message,
+    });
+    return;
+  }
+
+  console.log("result", result);
+
+  if (result.length === 0) {
+    res.status(200).send({
+      data: {
+        status: "not-connected",
+      },
+      error: null,
+    });
+    return;
+  }
+
+  const connection = result.find(
+    (item) => item.fromUserId === Number(userId) || item.toUserId === Number(userId)
+  );
+
+  if (!connection) {
+    res.status(200).send({
+      data: {
+        status: "not-connected",
+      },
+      error: null,
+    });
+    return;
+  }
+
+  if (connection.fromUserId === Number(userId) || connection.toUserId === Number(userId)) {
+    res.status(200).send({
+      data: {
+        status: connection.unique_key,
+        connectionId: connection.id,
+      },
+      error: null,
+    });
+    return;
+  }
 });
