@@ -3,13 +3,13 @@ Linked db tables:
 
 - users // [DB: Created , API: Created, UI: Created]
 - user_connections [Created] // [DB: Created , API:Created , UI: ]
-- messages :id -> [int], fromUserId ->[userId], toUserId -> [userId], text -> [text], // [DB: Created , API: , UI: ]
+- messages :id -> [int], fromUserId ->[userId], toUserId -> [userId], text -> [text], // [DB: Created , API:Created , UI: ]
     createdAt -> [timestamp], read -> [boolean] => [Created] // [DB: Created , API:Created , UI: ]
 - connection_status [Created] && [Data inserted] // [DB: Created , API:Created , UI: ]
 
   // skills
-- skills : id -> [int] ,name -> [text] // [DB: Created , API:Created , UI: ]
-- user_skills : id -> [int],userId -> [userId], skillId -> [skillId] // [DB: Created , API:Created , UI: ]
+- skills : id -> [int] ,name -> [text] // [DB: Created , API:Created , UI:Created ]
+- user_skills : id -> [int],userId -> [userId], skillId -> [skillId] // [DB: Created , API:Created , UI:Created ]
 
   // education
 - user_educations :id -> [int], userId -> [userId], school -> [text], degree -> [text], majorId -> [majorId],
@@ -21,7 +21,6 @@ Linked db tables:
   startedAt -> [timestamp], endedAt -> [timestamp], description -> [text] // [DB: Created , API: , UI: ]
 
   // posts
-
 - posts [Created] // [DB: Created , API:Created , UI:Created ]
 - post_likes [Created] // [DB: Created , API:Created , UI:Created ]
 - post_comments [Created] // [DB: Created , API:Created , UI:Created ]
@@ -58,6 +57,12 @@ Procedures:
     removing all user skills
 - proc_get_user_skills
     getting user skills
+- proc_get_last_message_by_user @userId INT,@FromUserId INT
+    getting last message by user
+- proc_get_by_user @userId INT,@fromUserId INT
+    getting all messages by user
+-  proc_mark_messages_as_read @fromUserId int, @toUserId int
+    marking messages as read
 
 Views;
 - v_user_connections

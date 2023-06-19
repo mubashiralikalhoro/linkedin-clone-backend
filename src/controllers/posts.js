@@ -15,6 +15,7 @@ const getPostObjectFormat = (item) => ({
   uuid: item?.uuid,
   likes: item?.likes,
   isLiked: item?.isLiked === 1,
+  comments: item?.comments,
   user: {
     id: item?.userId,
     username: item?.userUsername,
@@ -42,7 +43,10 @@ const getCommentObjectFormat = (item) => ({
 module.exports.get = createController(async (req, res) => {
   console.log("queries", req.query);
   console.log("req.userId", req.userId);
-  const { error, result } = await executeQuery(req.app.locals.db, Post.QUERIES.get({}, req.userId));
+  const { error, result } = await executeQuery(
+    req.app.locals.db,
+    Post.QUERIES.get(req.query, req.userId)
+  );
 
   console.log("results : ", result);
 
@@ -89,7 +93,11 @@ module.exports.post = createController(async (req, res) => {
     userId: req.userId,
   };
 
-  const saveResponse = await executeQueryWithData(req.app.locals.db, Post.QUERIES.insert(), payload);
+  const saveResponse = await executeQueryWithData(
+    req.app.locals.db,
+    Post.QUERIES.insert(),
+    payload
+  );
 
   // server error
   if (saveResponse.error) {
@@ -239,7 +247,11 @@ module.exports.addComment = createController(async (req, res) => {
     uuid: v4(),
   };
 
-  const { error: dbError } = await executeQueryWithData(req.app.locals.db, Post.QUERIES.insertComment(), payload);
+  const { error: dbError } = await executeQueryWithData(
+    req.app.locals.db,
+    Post.QUERIES.insertComment(),
+    payload
+  );
 
   if (dbError) {
     res.status(500).send({
@@ -270,7 +282,10 @@ module.exports.addComment = createController(async (req, res) => {
 
 // api/posts/:id/comment (GET)
 module.exports.getComments = createController(async (req, res) => {
-  const { error, result } = await executeQuery(req.app.locals.db, Post.QUERIES.getCommentsByPostId(req.params.id));
+  const { error, result } = await executeQuery(
+    req.app.locals.db,
+    Post.QUERIES.getCommentsByPostId(req.params.id)
+  );
 
   if (error) {
     res.status(500).send({

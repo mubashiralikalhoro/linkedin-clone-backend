@@ -23,6 +23,7 @@ app.use("/api/users", verifyJwt, require("./src/routes/users"));
 app.use("/api/posts", verifyJwt, require("./src/routes/posts"));
 app.use("/api/connections", verifyJwt, require("./src/routes/connections"));
 app.use("/api/skills", verifyJwt, require("./src/routes/skills"));
+app.use("/api/messages", verifyJwt, require("./src/routes/messages"));
 
 // Server with DB connection
 sql
