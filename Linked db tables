@@ -1,6 +1,7 @@
 Linked db tables:
-// user
 
+
+// users
 - users // [DB: Created , API: Created, UI: Created]
 - user_connections [Created] // [DB: Created , API:Created , UI: ]
 - messages :id -> [int], fromUserId ->[userId], toUserId -> [userId], text -> [text], // [DB: Created , API:Created , UI: ]
@@ -40,7 +41,6 @@ Linked db tables:
 - job_post_applications_statuses : id -> [int], name -> [text], uniqueKey -> [text] // [DB: Created , API: , UI: ]
 
 Procedures:
-
 - proc_send_connections_request @fromUserId int, @toUserId int:
    sending connection request from user to another user with status pending
 - proc_accept_connection @connectionId int

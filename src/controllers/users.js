@@ -8,7 +8,11 @@ const Joi = require("joi");
 // api/users
 module.exports.get = createController(async (req, res) => {
   const queries = req.query;
+  let queryType = queries.queryType || "like";
 
+  if (queries?.queryType) {
+    delete queries.queryType;
+  }
   // without queries (can't get all users)
   if (Object.keys(queries).length === 0) {
     res.status(401).send({
@@ -32,7 +36,7 @@ module.exports.get = createController(async (req, res) => {
     });
   }
 
-  const queryResponse = await executeQuery(req.app.locals.db, User.QUERIES.get(queries, "like"));
+  const queryResponse = await executeQuery(req.app.locals.db, User.QUERIES.get(queries, queryType));
 
   if (queryResponse.error) {
     res.status(500).send({
@@ -328,7 +332,8 @@ module.exports.deleteImage = createController(async (req, res) => {
     return;
   }
 
-  const image = imageType === "profile" ? UserResponse.result[0].image : UserResponse.result[0].coverImage;
+  const image =
+    imageType === "profile" ? UserResponse.result[0].image : UserResponse.result[0].coverImage;
 
   // user does not have a profile picture
   if (!image) {

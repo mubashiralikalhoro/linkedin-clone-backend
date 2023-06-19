@@ -13,7 +13,7 @@ module.exports.get = createController(async (req, res) => {
 
   if (connectedUsers.error) {
     res.status(500).send({
-      message: error.message,
+      message: connectedUsers.error,
     });
     return;
   }
